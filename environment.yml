@@ -1,31 +1,7 @@
+# Python bootstrap only; follow the pip steps in docs/ENVIRONMENT.md afterward.
 name: neurojepa
 channels:
-  - pytorch
-  - nvidia
   - conda-forge
-  - defaults
 dependencies:
   - python=3.10
   - pip
-  - pytorch=2.4.*
-  - torchvision=0.19.*
-  - torchaudio=2.4.*
-  - pytorch-cuda=12.1
-  - numpy
-  - pandas
-  - scipy
-  - pyyaml
-  - tqdm
-  - mpmath
-  - nibabel
-  - nilearn
-  - scikit-learn
-  - matplotlib
-  - seaborn
-  - pip:
-      - timm==1.0.22
-      - torchmetrics==1.8.2
-      - einops>=0.8
-      - loguru>=0.7
-      - fvcore>=0.1.5
-      - safetensors>=0.4.5

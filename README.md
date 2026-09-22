@@ -1,4 +1,4 @@
-# NeuroJEPA
+# A SCALING STUDY FOR FMRI FOUNDATION MODELS
 
 Research code for fMRI representation learning, with a simple interface for
 loading pretrained encoders and extracting downstream features.
@@ -11,20 +11,30 @@ to be confirmed; see [checkpoint selection](docs/CHECKPOINT_SELECTION.md).
 
 ## Quick start
 
-Use Python 3.10 or later. The release was tested with Python 3.10,
-PyTorch 2.4.0/2.4.1, and timm 1.0.22. After downloading or cloning this repository,
-run the following from its root directory:
+Use Python 3.10 and run these commands from the repository root on Linux.
+The recommended environment includes training and testing dependencies.
+
+Fresh Linux installation is verified with Python 3.10.19, PyTorch 2.4.1+cu121,
+and timm 1.0.22. Both models passed CPU/GPU checks; all 14 tests passed.
 
 ```bash
-python -m pip install -e .
+python3.10 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu121
+python -m pip install -c requirements/constraints-py310.txt -e ".[train,test]"
+python -m pip check
+python scripts/verify_environment.py --device cpu
+python -m pytest -q tests
 python examples/extract_features.py --variant 10m --device cpu
 python examples/extract_features.py --variant 2m --device cpu
 ```
 
 The checkpoint is a regular file in `checkpoints/`; no Hugging Face login,
 Git LFS client, or model download service is needed after obtaining the repo.
-For CUDA, install the appropriate PyTorch build for your machine and pass
-`--device cuda`. Only the CPU inference path has been verified in this release.
+For GPU verification, run `python scripts/verify_environment.py --device cuda`.
+See [environment setup](docs/ENVIRONMENT.md) for prerequisites, a full dependency
+lock, CPU-only installation, Conda, Windows notes, and troubleshooting.
 
 ```python
 import torch
@@ -63,14 +73,14 @@ the software interface and are not a scientific evaluation.
 
 ## Training and downstream evaluation
 
-Install the optional dependencies:
+The quick-start environment already includes the optional dependencies.
+If you previously installed only the inference package, add them with:
 
 ```bash
-python -m pip install -e ".[train]"
+python -m pip install -c requirements/constraints-py310.txt -e ".[train,test]"
 ```
 
-Alternatively use `environment.yml` for the original CUDA-oriented Conda
-environment. Adapt the example configs to your data and task before running:
+Adapt the example configs to your data and task before running:
 
 ```bash
 python pretrain.py --config configs/pretrain_example.yaml --output_dir outputs/pretrain
@@ -88,7 +98,7 @@ Multi-GPU execution uses `torchrun --nproc_per_node=<NUM_GPUS>` in place of
 ## Verification
 
 ```bash
-python -m pip install -e ".[test]"
+python scripts/verify_environment.py --device cpu
 python -m pytest -q tests
 ```
 

@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neurojepa"
-version = "0.1.1"
-description = "NeuroJEPA fMRI representation learning: research code and pretrained encoders"
+version = "0.1.2"
+description = "A SCALING STUDY FOR FMRI FOUNDATION MODELS"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "torch>=2.4", "torchvision>=0.19", "timm==1.0.22",
-  "numpy>=1.26", "safetensors>=0.4.5", "pyyaml>=6.0",
+  "torch>=2.4,<2.5", "torchvision>=0.19,<0.20", "timm==1.0.22",
+  "numpy>=1.26,<2", "safetensors>=0.4.5", "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
