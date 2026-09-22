@@ -127,4 +127,4 @@ loading API uses pickle-free safetensors instead.
 
 Training outputs can contain your local paths, task labels, and split settings.
 Keep them out of commits; `outputs/` is ignored. See the
-[README software checks](../README.md#6-check-your-installation) for tested scope.
+[README software checks](../README.md#tests) for tested scope.
