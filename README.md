@@ -62,12 +62,15 @@ contain a trained task head or the optimizer/projector needed to resume pretrain
 
 ## 3. Extract and save features
 
-Prepare one floating-point NumPy array per split:
+Prepare **three subject-disjoint splits: train, validation, and test**. Keep
+features and labels in the same row order:
 
 | File | Shape | Contents |
 | --- | --- | --- |
 | `data/X_train.npy` | `(N_train, 100, 200)` | Preprocessed training ROI time series |
 | `data/y_train.npy` | `(N_train,)` | Integer class labels aligned with rows |
+| `data/X_val.npy` | `(N_val, 100, 200)` | Validation ROI time series for parameter selection |
+| `data/y_val.npy` | `(N_val,)` | Validation labels aligned with rows |
 | `data/X_test.npy` | `(N_test, 100, 200)` | Held-out ROI time series |
 | `data/y_test.npy` | `(N_test,)` | Held-out labels aligned with rows |
 
@@ -78,6 +81,7 @@ a declaration that any parcellation is scientifically interchangeable.
 
 ```bash
 python examples/extract_features.py --variant 2m --input data/X_train.npy --output outputs/2m/train_features.npy --batch-size 16 --device cuda
+python examples/extract_features.py --variant 2m --input data/X_val.npy --output outputs/2m/val_features.npy --batch-size 16 --device cuda
 python examples/extract_features.py --variant 2m --input data/X_test.npy --output outputs/2m/test_features.npy --batch-size 16 --device cuda
 ```
 
@@ -106,24 +110,32 @@ with open("test_features.npy", "xb") as stream:
 ## 4. Train a linear probe and evaluate a test set
 
 Once features are saved, the encoder is no longer needed for probe fitting.
-The following example fits feature standardization and a logistic-regression
-classifier **using training rows only**, then evaluates the held-out test set:
+The example **reuses `finetune.py`'s downstream selection/evaluation function**:
+
+1. Fit the scaler and classifier on **train only**, once for each candidate C.
+2. Select C using **validation loss**. No candidate is selected using test data.
+3. Evaluate the selected, already-fitted model on **test**. Do not refit on train+val.
 
 ```bash
-python examples/linear_probe.py --train-features outputs/2m/train_features.npy --train-labels data/y_train.npy --test-features outputs/2m/test_features.npy --test-labels data/y_test.npy --C 1.0 --output-dir outputs/2m/probe
+python examples/linear_probe.py --train-features outputs/2m/train_features.npy --train-labels data/y_train.npy --val-features outputs/2m/val_features.npy --val-labels data/y_val.npy --test-features outputs/2m/test_features.npy --test-labels data/y_test.npy --output-dir outputs/2m/probe
 ```
 
 Results appear in the new output directory:
 
-- `metrics.json`: test accuracy, balanced accuracy, and macro-F1.
+- `metrics.json`: selected C, every candidate's validation metrics, and the
+  selected model's `val_stats` / final `test_stats`, using the source runner's
+  names (`acc`, weighted `f1`, `loss`, and log-score metrics).
 - `test_predictions.npy`: predicted labels, in test-input order.
 - `test_probabilities.npy`: class probabilities; columns follow `classes` in `probe.npz`.
 - `probe.npz`: classifier coefficients/intercept, class order, and training-set scaler parameters.
 
-This is a minimal **fixed-C classification example**, not the paper benchmark
-protocol. Choose `C` before looking at test results; use a separate validation
-split for tuning. For validation-based selection and the original training
-entry point, use the next section.
+The default C grid comes directly from `finetune.py`: `1e-5, 1e-4, ..., 1e3`.
+Override it with `--C-grid` only when matching your experiment configuration;
+set `--seed` to match its seed (default 42). As in the source, classification
+selection loss is **`1 - validation accuracy`**, not log-loss; ties keep the
+first candidate. Labels must cover classes `0 .. K-1` in train. This route uses
+the supplied fixed splits without subject-level pooling; use the original
+runner and your experiment YAML for other split/seed/pooling settings.
 
 Split by **subject before extraction**: sessions/windows from one participant
 must not cross train/validation/test boundaries. Row-wise random splitting can
@@ -151,8 +163,8 @@ python finetune.py --config outputs/configs/2m_probe.yaml --output_dir outputs/2
 ```
 
 The generated example keeps your validation/test manifests fixed, fits frozen
-features, and selects `C` from `[0.01, 0.1, 1.0, 10.0]` by validation loss.
-Test metrics are reported for the selected model. This user example does not
+features, and uses the source runner's default C grid (`1e-5` through `1e3`)
+and validation-loss selection. Final test metrics are reported for the selected model. This user example does not
 claim to reproduce the paper's experimental protocol.
 
 For end-to-end fine-tuning:
@@ -185,7 +197,9 @@ python scripts/verify_environment.py --device cuda --pretrain-smoke
 python -m pytest -q tests
 ```
 
-The documented workflows passed 19 automated tests on Linux. Both encoders
+The documented workflows passed 22 automated tests on Linux, including
+validation-only selection, test-label independence, and equality with the
+original runner's selection/metrics. Both encoders
 passed CPU/CUDA loading and file extraction; synthetic downstream runs covered
 both sizes and one epoch of 10m fine-tuning. These are software checks, not
 reproductions of paper metrics. Windows and multi-GPU execution are not verified.

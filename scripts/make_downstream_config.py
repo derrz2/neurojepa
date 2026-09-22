@@ -29,7 +29,8 @@ for split in ['train', 'val', 'test']:
     cfg['data'][split + '_list'] = [getattr(args, split + '_manifest')]
 cfg['probe'] = {'protocol_version': 'user_example_fixed_split', 'num_runs': 1,
                 'eval_split_group': 'fixed', 'eval_pooling': 'none',
-                'linear_probe': {'C_grid': [0.01, 0.1, 1.0, 10.0], 'max_iter': 2000}}
+                # Omit C_grid to use finetune.py's original default search grid.
+                'linear_probe': {'max_iter': 2000}}
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with args.output.open('x', encoding='utf-8') as stream:
     yaml.safe_dump(cfg, stream, sort_keys=False)

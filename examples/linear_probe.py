@@ -1,13 +1,14 @@
-"""Train a fixed-C linear classifier on cached features; evaluate held-out data."""
+"""Use the original downstream runner: train, select C on validation, then test."""
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+
+# Use the source-checkout training entry point, not a separate probe implementation.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from finetune import _fit_and_evaluate_probe
 
 
 def read_split(features, labels):
@@ -22,35 +23,40 @@ def read_split(features, labels):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for split in ['train', 'test']:
+    for split in ['train', 'val', 'test']:
         parser.add_argument(f'--{split}-features', required=True)
         parser.add_argument(f'--{split}-labels', required=True)
     parser.add_argument('--output-dir', type=Path, required=True)
-    parser.add_argument('--C', type=float, default=1.0, help='Fixed before test evaluation; tune only on a separate validation split.')
+    parser.add_argument('--C-grid', type=float, nargs='+', default=None,
+                        help='Candidate C values; defaults to finetune.py: 1e-5 through 1e3.')
+    parser.add_argument('--seed', type=int, default=42)
     args = parser.parse_args()
-    if not np.isfinite(args.C) or args.C <= 0:
-        parser.error('--C must be finite and positive')
     if args.output_dir.exists():
         parser.error('--output-dir already exists; choose a new directory')
     x_train, y_train = read_split(args.train_features, args.train_labels)
+    x_val, y_val = read_split(args.val_features, args.val_labels)
     x_test, y_test = read_split(args.test_features, args.test_labels)
-    if x_train.shape[1] != x_test.shape[1]:
-        raise ValueError('Train/test feature dimensions must match; use the same encoder.')
-    if len(np.unique(y_train)) < 2 or not set(y_test).issubset(set(y_train)):
-        raise ValueError('Training requires at least two classes and must cover all test classes.')
-    # Fit BOTH feature standardization and the classifier on training rows only.
-    probe = make_pipeline(StandardScaler(), LogisticRegression(C=args.C, max_iter=2000, random_state=42))
-    probe.fit(x_train, y_train)
+    if len({x_train.shape[1], x_val.shape[1], x_test.shape[1]}) != 1:
+        raise ValueError('Train/val/test feature dimensions must match; use the same encoder.')
+    classes = np.unique(y_train)
+    if len(classes) < 2 or not np.array_equal(classes, np.arange(len(classes))):
+        raise ValueError('Training labels must cover contiguous classes 0 .. K-1, with K >= 2.')
+    if not set(y_val).union(y_test).issubset(set(classes)):
+        raise ValueError('Training must cover every validation and test class.')
+    probe_cfg = {'eval_pooling': 'none', 'linear_probe': {'max_iter': 2000}}
+    if args.C_grid is not None:
+        probe_cfg['linear_probe']['C_grid'] = args.C_grid
+    val_stats, test_stats, selection, probe, test_outputs = _fit_and_evaluate_probe(
+        'linear_probe', 'classification', probe_cfg, args.seed,
+        x_train, y_train, x_val, y_val, x_test, y_test, return_estimator=True)
     classifier = probe[-1]
-    if np.max(classifier.n_iter_) >= classifier.max_iter:
-        raise RuntimeError('Classifier did not converge; adjust training settings without using test results.')
-    prediction = probe.predict(x_test)
-    report = {'protocol': 'fixed-C frozen-feature logistic regression; not the paper benchmark protocol',
-              'train_samples': len(x_train), 'test_samples': len(x_test),
-              'feature_dim': x_train.shape[1], 'C': args.C,
-              'test_accuracy': float(accuracy_score(y_test, prediction)),
-              'test_balanced_accuracy': float(balanced_accuracy_score(y_test, prediction)),
-              'test_macro_f1': float(f1_score(y_test, prediction, average='macro', zero_division=0))}
+    scores = test_outputs.numpy()
+    # Match the runner's >= 0 binary tie rule (sklearn.predict uses > 0).
+    prediction = (scores.reshape(-1) >= 0).astype(np.int64) if scores.ndim == 1 or scores.shape[1] == 1 else scores.argmax(1)
+    report = {'protocol': 'finetune.py validation-selected linear probe; supplied fixed splits',
+              'train_samples': len(x_train), 'val_samples': len(x_val), 'test_samples': len(x_test),
+              'feature_dim': x_train.shape[1], 'selected_C': selection['selected_C'],
+              'val_stats': val_stats, 'test_stats': test_stats, 'selection': selection}
     args.output_dir.mkdir(parents=True, exist_ok=False)
     np.save(args.output_dir / 'test_predictions.npy', prediction, allow_pickle=False)
     np.save(args.output_dir / 'test_probabilities.npy', probe.predict_proba(x_test), allow_pickle=False)

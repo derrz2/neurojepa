@@ -749,6 +749,8 @@ def _fit_and_evaluate_probe(
     test_y,
     val_group_keys=None,
     test_group_keys=None,
+    *,
+    return_estimator=False,
 ):
     eval_pooling = _get_probe_eval_pooling(probe_cfg)
 
@@ -854,6 +856,10 @@ def _fit_and_evaluate_probe(
             best_loss,
         )
 
+    if return_estimator:
+        # Reuse the selected train-fitted model in the cached-feature CLI;
+        # keep the original runner's three-value return contract unchanged.
+        return best_val_stats, test_stats, selection, estimator, test_outputs
     return best_val_stats, test_stats, selection
 
 

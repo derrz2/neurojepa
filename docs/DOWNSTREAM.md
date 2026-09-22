@@ -46,7 +46,8 @@ the release metadata. Do not change only the checkpoint filename while keeping
 the other model's width, attention heads, or register-token settings.
 
 The generated example uses the CSV validation/test splits **without resampling**,
-one seed, no subject-level prediction pooling, and this validation grid:
+one seed, no subject-level prediction pooling, and the source runner's default
+validation grid (`1e-5` through `1e3`, powers of ten):
 
 ```yaml
 probe:
@@ -55,7 +56,7 @@ probe:
   eval_split_group: fixed
   eval_pooling: none
   linear_probe:
-    C_grid: [0.01, 0.1, 1.0, 10.0]
+    # C_grid omitted: inherit the default grid from finetune.py.
     max_iter: 2000
 ```
 
@@ -65,6 +66,11 @@ evaluated on the test split, without refitting on validation data. This is a
 user-facing example protocol, not a reproduction of the paper's benchmark setup.
 Cached features stay in memory in this route; use the README's extraction CLI
 when you want reusable `.npy` feature files.
+
+The cached-feature `examples/linear_probe.py` requires all three splits and
+calls the very same selection/evaluation function. Given identical features,
+labels, grid, seed, and no pooling, it produces identical selected C and
+validation/test metrics. It does not add a second fixed-C evaluation protocol.
 
 For single-label classification, this runner's selection field `loss` is
 `1 - accuracy`, not cross-entropy. `log_loss` is reported separately. Ties keep
