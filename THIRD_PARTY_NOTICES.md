@@ -9,8 +9,8 @@ SlicingUnivariateTest with their required support code. Other statistical
 tests, examples, packaging and upstream documentation are omitted.
 No claim of authorship of this dependency is made.
 
-Files bearing Meta Platforms copyright notices retain those notices.
-Their referenced Apache 2.0 license is included in `LICENSES/Apache-2.0.txt`.
+The Apache 2.0 license text is retained in `LICENSES/Apache-2.0.txt`
+for upstream provenance.
 The ViT implementation uses timm APIs; timm is installed as a dependency.
 
 No new blanket license is assigned to the repository or weights in this
