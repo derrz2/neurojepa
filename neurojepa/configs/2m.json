@@ -1,9 +1,17 @@
 {
-  "status": "not_recovered",
-  "backbone_parameters": 2653568,
-  "completed_epochs": 200,
-  "optimizer_steps": 15000,
-  "identification": "Target epoch 199 is referenced by downstream records, but its weights have not been recovered.",
+  "status": "available",
+  "backbone_parameters": 2654336,
+  "completed_epochs": 64,
+  "optimizer_steps": 15808,
+  "identification": "Verified candidate: 2.65M parameters and 0.128 EFLOPs under the stated proxy; downstream records reference this checkpoint. Paper-table identity is not uniquely established.",
+  "compute_estimate": {
+    "eflops": 0.12804869594913176,
+    "method": "3x analytic forward FLOPs, actual projector [2048,2048,512], mean channel-crop scales",
+    "global_batch_size": 256,
+    "steps_per_epoch": 247,
+    "global_channel_scale": 0.9,
+    "local_channel_scale": 0.45
+  },
   "model": {
     "backbone_name": "vit",
     "backbone_family": "vit",
@@ -16,10 +24,10 @@
       1,
       40
     ],
-    "reg_tokens": 1,
+    "reg_tokens": 4,
     "mlp_ratio": 4.0,
     "ffn_layer": "mlp",
-    "init_values": 1e-05,
+    "init_values": 0.0001,
     "qkv_bias": true,
     "qk_norm": true,
     "norm": {
@@ -45,5 +53,8 @@
     "depth": 12,
     "num_heads": 2
   },
-  "weights": null
+  "weights": {
+    "filename": "neurojepa-2m-epoch63.safetensors",
+    "sha256": "2da6afd688f2327595a1c16da1a4c246a05f0f3a30eef00043615eeae0fdbe92"
+  }
 }

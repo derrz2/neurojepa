@@ -11,19 +11,21 @@ appropriate training/validation/test splits.
 
 | Variant | Encoder parameters | Width / layers / heads | Weight status |
 | --- | ---: | --- | --- |
-| `2m` | 2,653,568 | 128 / 12 / 2 | Target epoch 199 missing |
+| `2m` | 2,654,336 | 128 / 12 / 2 | Epoch 63, encoder-only safetensors |
 | `10m` | 10,417,408 | 256 / 12 / 4 | Epoch 299, encoder-only safetensors |
 
 Both configurations use temporal patches of 40 and ROI patches of 1.
-They use one and four register tokens respectively. Exact normalization,
+Both released candidates use four register tokens. Exact normalization,
 rotary-position, attention-gating, and layer-scale settings are stored in
 the JSON configuration shipped with each architecture.
 
-The available checkpoint was referenced by preserved downstream experiment
+Both available checkpoints were referenced by preserved downstream experiment
 records. Parameter counts and optimizer-step metadata have been checked.
 The paper-table identity remains provisional: parameter counts are not
 unique identifiers, and rounded compute estimates depend on crop-accounting
-assumptions. No unverified EFLOPs number is presented as release metadata.
+assumptions. The small-model JSON includes an explicitly labeled analytic
+compute estimate, not a hardware measurement or a unique identifier.
+See [checkpoint selection](CHECKPOINT_SELECTION.md).
 
 ## Inputs and outputs
 

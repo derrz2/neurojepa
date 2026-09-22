@@ -9,15 +9,16 @@ from src.models.backbone import build_backbone
 from src.utils.checkpoint import load_checkpoint
 
 
-def test_downstream_encoder_matches_pretrained():
-    spec = available_models()['10m']
+@pytest.mark.parametrize('variant', ['2m', '10m'])
+def test_downstream_encoder_matches_pretrained(variant):
+    spec = available_models()[variant]
     cfg = {
         'model': deepcopy(spec['model']),
         'task': {'num_classes': 2},
         'experiment': {'pretrained_checkpoint': 'checkpoints/' + spec['weights']['filename']},
     }
     model = create_model(cfg).eval()
-    encoder = load_model('10m')
+    encoder = load_model(variant)
     torch.manual_seed(42)
     x = torch.randn(2, 100, 200)
     with torch.inference_mode():
@@ -29,8 +30,9 @@ def test_downstream_encoder_matches_pretrained():
 
 
 @pytest.mark.parametrize('fault', ['missing_key', 'wrong_shape'])
-def test_downstream_rejects_incompatible_encoder(tmp_path, fault):
-    spec = available_models()['10m']
+@pytest.mark.parametrize('variant', ['2m', '10m'])
+def test_downstream_rejects_incompatible_encoder(tmp_path, fault, variant):
+    spec = available_models()[variant]
     model = build_backbone({'model': deepcopy(spec['model'])}, downstream=True, num_classes=2)
     state = load_file('checkpoints/' + spec['weights']['filename'])
     if fault == 'missing_key':
@@ -43,8 +45,9 @@ def test_downstream_rejects_incompatible_encoder(tmp_path, fault):
         load_checkpoint(str(path), model, mode='pretrained', target='backbone')
 
 
-def test_downstream_rejects_modified_named_release(tmp_path):
-    spec = available_models()['10m']
+@pytest.mark.parametrize('variant', ['2m', '10m'])
+def test_downstream_rejects_modified_named_release(tmp_path, variant):
+    spec = available_models()[variant]
     path = tmp_path / spec['weights']['filename']
     path.write_bytes(b'corrupted')
     model = build_backbone({'model': deepcopy(spec['model'])}, downstream=True, num_classes=2)
