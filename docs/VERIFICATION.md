@@ -1,5 +1,31 @@
 # Verification scope
 
+## User workflows: version 0.1.3
+
+Verified on 2026-09-22 in the isolated Linux reference environment described
+below (same dependencies, updated source). **19 automated tests passed**, none
+skipped, in 19.49 seconds. New tests cover batched file extraction and row order
+for both encoders, refusal to overwrite feature files, saved linear-probe
+parameters/predictions, training-only standardization, and generated architecture
+configurations for both model sizes.
+
+Additional CLI runs used synthetic, subject-disjoint fixtures (8 training,
+4 validation, 4 test samples), not participant data:
+
+- Both 2m and 10m encoders extracted ordered `.npy` features on CUDA.
+- Both feature sets trained the fixed-C classifier and produced held-out
+  metrics, predictions, probabilities, and numeric probe parameters.
+- Both model variants completed `finetune.py` with CSV manifests, fixed
+  validation/test splits, a four-value C grid, and `probe_summary.json` output.
+- The generated 10m full-finetune configuration completed one epoch (two
+  training batches, batch size 4, warmup disabled for this smoke test),
+  validation/test evaluation, and best-checkpoint saving on CUDA.
+
+These runs check end-to-end software execution, not useful predictive
+performance, convergence, or the paper's benchmark protocol. The new file-based
+extraction path was tested on CPU and CUDA; the complete manifest pipeline was
+tested on CUDA. `frozen_head` mode was not separately exercised end-to-end.
+
 ## Fresh environment: version 0.1.2
 
 Verified on 2026-09-22 using a newly created Linux x86_64 virtual environment,
