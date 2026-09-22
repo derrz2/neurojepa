@@ -65,7 +65,7 @@ Expected parameter counts are 2,654,336 and 10,417,408. Input `(2, 100, 200)`
 produces features `(2, 128)` and `(2, 256)`. Failures cause a nonzero exit.
 Tests also cover downstream initialization and pretraining model, optimizer,
 and scheduler construction. No participant data is needed. See the actual
-tested platform and limits in [verification scope](VERIFICATION.md).
+tested platform and limits in the [README](../README.md#6-check-your-installation).
 The optional `--pretrain-smoke` also runs one pretraining forward/backward and
 optimizer step with the example configuration and eight synthetic views. It
 initializes a new training model; it does not modify the released checkpoints.

@@ -6,7 +6,6 @@
 /checkpoints/*
 !/checkpoints/neurojepa-10m-epoch299.safetensors
 !/checkpoints/neurojepa-2m-epoch63.safetensors
-!/checkpoints/README.md
 /wandb/
 /logs/
 /runs/

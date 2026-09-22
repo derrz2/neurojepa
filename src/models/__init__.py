@@ -4,17 +4,8 @@ from ..utils.checkpoint import load_checkpoint
 
 from importlib import import_module
 
-# Inference should not import every optional pretraining method.
-_METHODS = {
-    'dino': ('DINO', 'DINO_VIT'), 'byol': ('BYOL', 'BYOLModel'),
-    'lejepa': ('LeJEPA_model', 'LEJEPA_VIT'),
-    'lejepa_sliced_prior': ('LeJEPASlicedPrior', 'LEJEPASlicedPrior_VIT'),
-    'leworld': ('LeWorldModel', 'LeWorldModel'),
-    'lpjepa': ('LpJEPA', 'RectifiedLpJEPA'), 'ijepa': ('IJEPA', 'IJEPAModel'),
-    'mae': ('MAE', 'MAE_VIT'), 'simmim': ('SimMIM', 'SimMIM_VIT'),
-    'simclr': ('SimCLR', 'SimCLRModel'), 'simsiam': ('SimSiam', 'SimSiamModel'),
-    'vicreg': ('VICReg', 'VICRegModel'), 'swav': ('SwAV', 'SwAVModel'),
-}
+# Keep inference independent of optional pretraining dependencies.
+_METHODS = {'lejepa': ('LeJEPA_model', 'LEJEPA_VIT')}
 
 
 def __getattr__(name):

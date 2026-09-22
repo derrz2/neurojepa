@@ -1,9 +1,6 @@
 {
   "status": "available",
   "backbone_parameters": 10417408,
-  "completed_epochs": 300,
-  "optimizer_steps": 74100,
-  "identification": "Candidate for the reported 10.42M model; paper table correspondence is not independently established.",
   "model": {
     "backbone_name": "vit",
     "backbone_family": "vit",
@@ -17,18 +14,18 @@
       40
     ],
     "reg_tokens": 4,
-    "mlp_ratio": 4.0,
+    "mlp_ratio": 4,
     "ffn_layer": "mlp",
     "init_values": 0.0001,
     "qkv_bias": true,
     "qk_norm": true,
     "norm": {
       "type": "layernorm",
-      "eps": 1e-06,
+      "eps": 0.000001,
       "qk_type": "layernorm"
     },
-    "drop_rate": 0.0,
-    "attn_drop_rate": 0.0,
+    "drop_rate": 0,
+    "attn_drop_rate": 0,
     "drop_path_rate": 0.1,
     "global_pool": "token",
     "gate_attention": "elementwise",
@@ -36,7 +33,7 @@
     "rope": {
       "enable": true,
       "rotary_dim_ratio": 0.5,
-      "base": 300.0,
+      "base": 300,
       "normalize_coords": "separate",
       "layer_start": 1,
       "layer_end": 12

@@ -120,5 +120,5 @@ head, and training state under the run's checkpoint directory. Treat legacy
 loading API uses pickle-free safetensors instead.
 
 Training outputs can contain your local paths, task labels, and split settings.
-Keep them out of commits; `outputs/` is ignored. Refer to
-[verification scope](VERIFICATION.md) for what has actually been tested.
+Keep them out of commits; `outputs/` is ignored. See the
+[README software checks](../README.md#6-check-your-installation) for tested scope.

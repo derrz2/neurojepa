@@ -185,8 +185,10 @@ python scripts/verify_environment.py --device cuda --pretrain-smoke
 python -m pytest -q tests
 ```
 
-See [verification results and limits](docs/VERIFICATION.md). Full convergence,
-multi-GPU training, and paper metrics have not been reproduced by these checks.
+The documented workflows passed 19 automated tests on Linux. Both encoders
+passed CPU/CUDA loading and file extraction; synthetic downstream runs covered
+both sizes and one epoch of 10m fine-tuning. These are software checks, not
+reproductions of paper metrics. Windows and multi-GPU execution are not verified.
 
 ## Pretraining and release notes
 
@@ -197,10 +199,9 @@ For pretraining from scratch, adapt your data settings in
 python pretrain.py --config configs/pretrain_example.yaml --output_dir outputs/pretrain
 ```
 
-The internal objective selector `lejepa` is retained for compatibility.
-Both released encoders have verified loading/export equivalence, but their
-definitive mapping to the paper table remains to be confirmed; see
-[checkpoint selection](docs/CHECKPOINT_SELECTION.md) and [model card](docs/MODEL_CARD.md).
+This compact release includes the NeuroJEPA/LeJEPA objective and ViT backbone;
+unrelated baseline implementations are excluded. The internal selector `lejepa`
+is retained for compatibility.
 
 No participant data, private infrastructure paths, credentials, experiment
 outputs, or backups are included. Preserve [third-party notices](THIRD_PARTY_NOTICES.md).
