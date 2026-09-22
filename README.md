@@ -1,9 +1,5 @@
 # A SCALING STUDY FOR FMRI FOUNDATION MODELS
 
-<p align="center">
-  <img src="assets/scaling.jpg" alt="Model and data scaling in fMRI representation learning" width="720">
-</p>
-
 NeuroJEPA: pretrained fMRI encoders, feature extraction, and downstream evaluation.
 
 ## Install
