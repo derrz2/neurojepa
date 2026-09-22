@@ -1,0 +1,90 @@
+experiment:
+  seed: 42
+  mode: linear_probe
+  resume: null
+  pretrained_checkpoint: checkpoints/neurojepa-10m-epoch299.safetensors
+  skip_bias_in_pretrained: false
+
+task:
+  task_type: classification
+  num_classes: 2
+  label_col: label
+
+data:
+  input_seq_len: 200
+  mode: multi_site
+  # Replace with paths to your own one-path-per-line split files.
+  train_list: [data/splits/train.txt]
+  val_list: [data/splits/val.txt]
+  test_list: [data/splits/test.txt]
+  datasets: []
+  csv_root: null
+  roi_channels: 100
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  enable_fc: false
+  prefetch_factor: 2
+  transform: false
+
+model_chose: lejepa
+vit_config: configs/backbone/vit.yaml
+model:
+  model_size: p13
+  embed_dim: 256
+  depth: 12
+  num_heads: 4
+  gate_attention: elementwise
+  img_size: [100, 200]
+  patch_size: [1, 40]
+  reg_tokens: 4
+  init_values: 1.0e-4
+  norm:
+    type: layernorm
+    eps: 1.0e-6
+    qk_type: layernorm
+  drop_path_rate: 0.1
+  downstream: true
+  fusion_mode: none
+  rope:
+    enable: true
+    rotary_dim_ratio: 0.5
+    base: 300.0
+    normalize_coords: separate
+    layer_start: 1
+    layer_end: 12
+
+optim:
+  epochs: 50
+  weight_decay: 0.05
+  warmup_epochs: 10
+  betas: [0.9, 0.999]
+  head_lr: 1.0e-4
+  learning_rate: 1.0e-4
+  lr_scheduler: cosine
+  layer_decay: 1.0
+  min_lr: 1.0e-6
+  optimizer: adamw
+
+training:
+  clip_grad: 1.0
+  accum_iter: 1
+  use_amp: true
+  freeze_encoder: true
+
+distributed:
+  backend: nccl
+  init_method: env://
+  world_size: -1
+  rank: -1
+  dist_url: env://
+
+logging:
+  print_freq: 20
+  log_freq: 20
+  save_freq: 50
+  use_wandb: false
+
+validation:
+  val_freq: 1
+  save_best: false

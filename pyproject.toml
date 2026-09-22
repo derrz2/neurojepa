@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurojepa"
+version = "0.1.0"
+description = "NeuroJEPA fMRI representation learning: research code and pretrained encoders"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.4", "torchvision>=0.19", "timm==1.0.22",
+  "numpy>=1.26", "safetensors>=0.4.5", "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+train = [
+  "pandas", "scipy", "tqdm", "mpmath", "nibabel", "nilearn",
+  "scikit-learn", "matplotlib", "seaborn", "torchmetrics==1.8.2",
+  "einops>=0.8", "loguru>=0.7", "fvcore>=0.1.5",
+]
+test = ["pytest>=8"]
+
+[tool.setuptools]
+py-modules = ["vit_size_presets", "subject_session_data"]
+
+[tool.setuptools.packages.find]
+include = ["neurojepa*", "src*"]
+
+[tool.setuptools.package-data]
+neurojepa = ["configs/*.json"]

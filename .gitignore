@@ -1,0 +1,40 @@
+# Generated data and experiment artifacts
+/data/
+/data_csv/
+/outputs/
+/output/
+/checkpoints/*
+!/checkpoints/neurojepa-10m-epoch299.safetensors
+!/checkpoints/README.md
+/wandb/
+/logs/
+/runs/
+
+# Python and editor artifacts
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+
+# Local configuration and backups
+*.bak
+*.bak*
+*.backup
+*.backup*
+*.before*
+*.codex_backup*
+*.orig
+*.tmp
+*.log
+*.out
+*.err
+*~
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+.env
+.env.*

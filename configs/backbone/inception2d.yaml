@@ -1,0 +1,14 @@
+model:
+  backbone_name: "inception2d"
+  backbone_family: "inception2d"
+  model_size: "base"
+  img_size: [100, 200]
+  embed_dim: 768
+  drop_rate: 0.0
+  drop_path_rate: 0.0
+  downstream: false
+  global_pool: "avg"
+  branch_kernels: [[3, 3], [5, 5], [7, 7]]
+  bottleneck_ratio: 0.5
+  pool_proj_ratio: 0.25
+  stem_stride: 2

@@ -1,0 +1,166 @@
+experiment:
+  name: neurojepa_pretrain
+  output_dir: outputs/pretrain
+  log_dir: null
+  checkpoint_dir: null
+  resume: null
+  seed: 42
+
+data:
+  csv_root: null
+  train_split_suffixes: [train]
+  val_split_suffixes: [val]
+  input_seq_len: 200
+  datasets: []
+  # Replace with paths to your own one-path-per-line split files.
+  train_list: [data/splits/train.txt]
+  val_list: [data/splits/val.txt]
+  batch_size: 32
+  num_workers: 8
+  pin_memory: true
+  prefetch_factor: 2
+  enable_fc: false
+  enable_persistent: true
+  transform: true
+  variable_roi_pretrain: true
+  augment:
+    full_sequence_to_augment: false
+    preserve_cropped_channels: true
+    allow_variable_roi_batching: true
+    global_crops_scale: [0.6, 1.0]
+    local_crops_scale: [0.2, 0.5]
+    global_channel_crops_scale: [0.6, 1.0]
+    local_channel_crops_scale: [0.2, 0.5]
+    local_crops_number: 6
+    global_output_size: [100, 200]
+    local_output_size: [40, 80]
+    view_mode: global_local
+    n_views: 2
+    view_crops_scale: [0.6, 1.0]
+    view_channel_crops_scale: [0.7, 1.0]
+    view_output_size: [100, 200]
+    temporal:
+      enable: true
+      prob: 0.3
+      scale_range: [0.8, 1.2]
+    roi_mask_prob: 0.1
+    time_mask_prob: 0.1
+    time_mask_span_ratio: [0.05, 0.1]
+    scale_std: 0.025
+    jitter_std_ratio: 0.02
+  subject_sampling:
+    enable: false
+    mode: epoch_random_one_session
+    seed: 42
+
+model_chose: lejepa
+backbone_config: backbone/vit.yaml
+model:
+  backbone_name: vit
+  backbone_family: vit
+  model_size: tiny
+  img_size: [100, 200]
+  patch_size: [1, 40]
+  reg_tokens: 4
+  mlp_ratio: 4.0
+  ffn_layer: mlp
+  init_values: 0.0001
+  qkv_bias: true
+  qk_norm: true
+  norm:
+    type: layernorm
+    eps: 1.0e-06
+    qk_type: layernorm
+  drop_rate: 0.0
+  attn_drop_rate: 0.0
+  drop_path_rate: 0.1
+  downstream: false
+  global_pool: token
+  gate_attention: elementwise
+  pos_embed: learn
+  rope:
+    enable: true
+    rotary_dim_ratio: 0.5
+    base: 300.0
+    normalize_coords: separate
+    layer_start: 1
+    layer_end: 12
+  lejepa:
+    sigreg_enable: true
+    lamda: 0.05
+    alpha: 0.5
+    num_slices: 4096
+    n_points: 17
+    proj_dim: 512
+    n_global_views: 2
+    n_local_views: 6
+
+training:
+  clip_grad: 3.0
+  accum_iter: 1
+  OFFICIAL_EPOCH_LENGTH: 124
+  max_steps: null
+  stop_on_max_steps: false
+  use_amp: true
+  activation_checkpointing: false
+  probe_val: false
+  freeze_encoder: false
+  overlap_h2d: true
+
+optim:
+  epochs: 200
+  weight_decay: 0.00005
+  weight_decay_end: 0.005
+  base_lr: 0.02
+  lr: 0.0
+  warmup_mode: step_ratio
+  warmup_ratio: 0.1
+  warmup_min_steps: 50
+  warmup_max_steps: 1000
+  warmup_epochs: 20
+  min_lr: 1.0e-06
+  freeze_last_layer_epochs: 0
+  scaling_rule: linear
+  patch_embed_lr_mult: 1.0
+  layerwise_decay: 1.0
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+
+distributed:
+  strategy: fsdp
+  backend: nccl
+  init_method: env://
+  world_size: -1
+  rank: -1
+  dist_url: env://
+
+logging:
+  print_freq: 20
+  log_freq: 20
+  save_freq: 20
+  use_wandb: false
+
+validation:
+  val_freq: 1
+  save_best: true
+  selection_metric: weighted_inv_loss
+  rankme:
+    enable: true
+    max_samples: 4096
+  deterministic_multiview:
+    enable: false
+    n_global_views: 2
+    n_local_views: 6
+    global_output_size: [100, 200]
+    local_output_size: [40, 80]
+    use_full_channels: true
+    disable_noise: true
+  zero_shot:
+    enable: false
+
+teacher:
+  teacher_temp: 0.07
+  momentum_teacher: 0.996
+  final_momentum_teacher: 1.0
+  warmup_teacher_temp_epochs: 5
+  warmup_teacher_temp: 0.04

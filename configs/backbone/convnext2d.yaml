@@ -1,0 +1,10 @@
+model:
+  backbone_name: "convnext2d"
+  backbone_family: "convnext2d"
+  model_size: "base"
+  img_size: [100, 200]
+  embed_dim: 768
+  drop_rate: 0.0
+  drop_path_rate: 0.1
+  downstream: false
+  global_pool: "avg"
